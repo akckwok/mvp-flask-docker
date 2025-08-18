@@ -123,6 +123,7 @@ if __name__ == '__main__':
     except subprocess.CalledProcessError as e:
         print(f"Error building Docker image for '{pipeline}'. Please ensure Docker is running.")
         print(f"Stderr:\n{e.stderr}")
+
     except Exception as e:
         print(f"An unexpected error occurred during Docker image build: {e}")
 
