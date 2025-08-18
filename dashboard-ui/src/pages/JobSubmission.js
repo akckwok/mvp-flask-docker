@@ -54,7 +54,7 @@ export function initializeJobSubmissionPage() {
     if (dropZoneContainer) {
         createDropZone(dropZoneContainer, handleFileSelect);
     }
+
     // Fetch the pipelines when the job submission page is initialized
     fetchPipelines();
-
 }

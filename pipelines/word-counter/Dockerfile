@@ -10,5 +10,5 @@ COPY process.sh .
 # Make the script executable
 RUN chmod +x process.sh
 
-# The command to run when the container starts
-CMD ["./process.sh"]
+# The entrypoint to run when the container starts
+ENTRYPOINT ["./process.sh"]
