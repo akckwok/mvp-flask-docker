@@ -1,1 +1,7 @@
 Flask
+Flask-Login
+Flask-Bcrypt
+Werkzeug
+Flask-SQLAlchemy
+SQLAlchemy
+pytest
