@@ -4,24 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Processing Dashboard</title>
-    <!-- Link to any global stylesheets or fonts here -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- 
-      This is the root element where the entire JavaScript application 
-      will be mounted. The content of this div will be replaced by 
-      the components defined in your src/ directory (e.g., App.js).
-    -->
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
 
-    <!-- 
-      This script tag points to the main entry point of your application.
-      Modern build tools (like Webpack or Vite) will bundle all your 
-      JavaScript from the src/ directory into a single file that gets 
-      injected here. The 'type="module"' attribute is used for modern JS.
-    -->
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h1>Dashboard</h1>
+            <nav>
+                <ul>
+                    <li><a href="#jobs" class="nav-link active">Job Submission</a></li>
+                    <li><a href="#reports" class="nav-link">Reports</a></li>
+                    <li><a href="#account" class="nav-link">Account</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content" id="content-area">
+            <!-- Pages will be dynamically loaded here -->
+            <section id="jobs" class="page active">
+                <h2>Job Submission</h2>
+                <div id="drop-zone-container"></div>
+                <div id="status-cards-container" style="margin-top: 30px;"></div>
+            </section>
+            <section id="reports" class="page">
+                <h2>Reports</h2>
+                <p>Content for viewing reports will go here.</p>
+            </section>
+            <section id="account" class="page">
+                <h2>Account</h2>
+                <p>Content for account settings will go here.</p>
+            </section>
+        </main>
+    </div>
+
     <script type="module" src="/src/index.js"></script>
 </body>
 </html>
