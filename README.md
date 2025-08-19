@@ -33,27 +33,33 @@ sudo usermod -aG docker ${USER}
 ```
 You will need to log out and log back in for this change to take effect.
 
-### Installation & Setup
+### Easy Setup with `setup.sh`
 
-1.  **Clone the repository.**
-2.  **Install Python dependencies:**
+For a quick start, you can use the provided setup script. This script will install all dependencies, build the pipeline images, and build the frontend for production.
+
+```bash
+./setup.sh
+```
+
+After the script finishes, you can run the application in production mode with `python run.py`.
+
+### Manual Installation
+
+If you prefer to install the components manually, follow these steps:
+
+1.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
-3.  **Install frontend dependencies:**
+2.  **Install frontend dependencies:**
     ```bash
     npm install --prefix dashboard-ui
     ```
-
-### Building the Pipeline Images
-
-The application expects that the Docker images for the pipelines have been pre-built. You need to build an image for each pipeline defined in the `/pipelines` directory.
-
-For example, to build the `word-counter` pipeline:
-```bash
-docker build -t word-counter-image ./pipelines/word-counter
-```
-Make sure the image name matches the `image_name` field in the pipeline's `manifest.json`, or the convention `<pipeline_id>-image` if `image_name` is not specified.
+3.  **Build the Pipeline Images:**
+    The application expects that the Docker images for the pipelines have been pre-built. You need to build an image for each pipeline defined in the `/pipelines` directory. For example:
+    ```bash
+    docker build -t word-counter-image ./pipelines/word-counter
+    ```
 
 ---
 
