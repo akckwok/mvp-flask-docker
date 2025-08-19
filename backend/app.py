@@ -5,6 +5,16 @@ from .config import UPLOADS_DIR, BASE_DIR
 from .views import api
 
 from . import db
+from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
+from .models import User
+
+bcrypt = Bcrypt()
+login_manager = LoginManager()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 def create_app():
     """Create and configure an instance of the Flask application."""
@@ -13,9 +23,12 @@ def create_app():
     # --- Configuration ---
     # Load config from .config file
     app.config.from_pyfile('config.py')
+    app.config['SECRET_KEY'] = 'a_super_secret_key' # CHANGE THIS!
 
     # --- Initialize Extensions ---
     db.init_app(app)
+    bcrypt.init_app(app)
+    login_manager.init_app(app)
 
     # --- Create Directories ---
     # Ensure the uploads directory exists
@@ -42,15 +55,21 @@ def create_app():
         db.create_all()
 
     # --- Static File Serving ---
-    # In a production environment, the frontend is served from the 'dist' directory.
-    dist_dir = os.path.join(BASE_DIR, 'dashboard-ui', 'dist')
+    # In a production environment, the frontend is served from the 'dashboard-ui' directory.
+    ui_dir = os.path.join(BASE_DIR, 'dashboard-ui')
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve_spa(path):
-        if path != "" and os.path.exists(os.path.join(dist_dir, path)):
-            return send_from_directory(dist_dir, path)
-        else:
-            return send_from_directory(dist_dir, 'index.html')
+        if path and os.path.exists(os.path.join(ui_dir, path)):
+            return send_from_directory(ui_dir, path)
+
+        if not current_user.is_authenticated:
+            return send_from_directory(ui_dir, 'login.html')
+
+        if path in ['login', 'register']:
+             return send_from_directory(ui_dir, f'{path}.html')
+
+        return send_from_directory(ui_dir, 'index.html')
 
     return app
