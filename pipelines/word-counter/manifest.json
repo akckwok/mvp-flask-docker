@@ -1,0 +1,20 @@
+{
+  "name": "Word Counter",
+  "description": "Counts the words, lines, and characters in one or more text files.",
+  "inputs": [
+    {
+      "name": "text_files",
+      "type": "file",
+      "description": "The text files to process.",
+      "multiple": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "word_count_result",
+      "type": "stdout",
+      "description": "The result of the word count, including lines, words, and characters."
+    }
+  ],
+  "image_name": "word-counter-image"
+}

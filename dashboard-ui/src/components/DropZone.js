@@ -1,8 +1,8 @@
-export function createDropZone(container, onFileSelect) {
+export function createDropZone(container, onFilesSelect) {
     container.innerHTML = `
         <div class="drop-zone">
-            <p>Drag & Drop a file here or click to select</p>
-            <input type="file" class="drop-zone-input" style="display: none;">
+            <p>Drag & Drop files here or click to select</p>
+            <input type="file" class="drop-zone-input" style="display: none;" multiple>
         </div>
         <div class="file-info"></div>
     `;
@@ -11,15 +11,21 @@ export function createDropZone(container, onFileSelect) {
     const fileInput = container.querySelector('.drop-zone-input');
     const fileInfo = container.querySelector('.file-info');
 
-    const handleClick = () => fileInput.click();
-    const handleFileChange = () => {
-        if (fileInput.files.length > 0) {
-            handleFile(fileInput.files[0]);
+    const handleClick = () => {
+        if (dropZone.classList.contains('disabled')) return;
+        fileInput.click();
+    };
+
+    const handleFilesChange = (e) => {
+        const files = e.target.files;
+        if (files.length > 0) {
+            handleFiles(files);
         }
     };
 
     const handleDragOver = (e) => {
         e.preventDefault();
+        if (dropZone.classList.contains('disabled')) return;
         dropZone.classList.add('hover');
     };
 
@@ -29,46 +35,52 @@ export function createDropZone(container, onFileSelect) {
 
     const handleDrop = (e) => {
         e.preventDefault();
+        if (dropZone.classList.contains('disabled')) return;
         dropZone.classList.remove('hover');
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            handleFile(file);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFiles(files);
         }
     };
 
-    function handleFile(file) {
-        fileInfo.innerHTML = `Selected file: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(2)} KB)`;
-        if (onFileSelect) {
-            onFileSelect(file);
+    function handleFiles(files) {
+        const fileList = Array.from(files);
+        if (fileList.length === 1) {
+            const file = fileList[0];
+            fileInfo.innerHTML = `Selected file: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(2)} KB)`;
+        } else {
+            fileInfo.innerHTML = `Selected ${fileList.length} files.`;
+        }
+
+        if (onFilesSelect) {
+            onFilesSelect(fileList);
         }
     }
 
     dropZone.addEventListener('click', handleClick);
-    fileInput.addEventListener('change', handleFileChange);
+    fileInput.addEventListener('change', handleFilesChange);
     dropZone.addEventListener('dragover', handleDragOver);
     dropZone.addEventListener('dragleave', handleDragLeave);
     dropZone.addEventListener('drop', handleDrop);
 
-    // Add styling
-    const style = document.createElement('style');
-    style.textContent = `
-        .drop-zone {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-            background-color: #fafafa;
-        }
-        .drop-zone.hover {
-            background-color: #eef8ff;
-            border-color: #007bff;
-        }
-        .file-info {
-            margin-top: 20px;
-            font-size: 1rem;
-        }
-    `;
-    container.appendChild(style);
+    if (!document.getElementById('drop-zone-styles')) {
+        const style = document.createElement('style');
+        style.id = 'drop-zone-styles';
+        style.textContent = `
+            .drop-zone {
+                border: 2px dashed #ccc; border-radius: 8px; padding: 40px;
+                text-align: center; cursor: pointer; transition: background-color 0.2s, border-color 0.2s;
+                background-color: #fafafa;
+            }
+            .drop-zone.hover { background-color: #eef8ff; border-color: #007bff; }
+            .drop-zone.disabled {
+                background-color: #f0f0f0;
+                border-color: #d0d0d0;
+                cursor: not-allowed;
+                color: #a0a0a0;
+            }
+            .file-info { margin-top: 20px; font-size: 1rem; }
+        `;
+        container.appendChild(style);
+    }
 }

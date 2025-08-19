@@ -1,130 +1,126 @@
 import os
-import subprocess
 import uuid
 from flask import Flask, request, jsonify, send_from_directory
+import pipeline_manager
 
 app = Flask(__name__)
 
-# In-memory store for job information
-# In a real app, you would use a database (e.g., Redis, PostgreSQL)
+# In-memory stores for job and pipeline information
 jobs_db = {}
+available_pipelines = []
 UPLOADS_DIR = 'uploads'
 
-# Serve the main HTML file from the public directory
+# --- HTML Serving ---
+
 @app.route('/')
 def serve_index():
     return send_from_directory('dashboard-ui/public', 'index.html')
 
-# Serve other static files from the public directory (e.g., CSS)
 @app.route('/<path:filename>')
 def serve_public(filename):
     return send_from_directory('dashboard-ui/public', filename)
 
-# Serve JavaScript module files from the src directory
 @app.route('/src/<path:filename>')
 def serve_src(filename):
     return send_from_directory('dashboard-ui/src', filename)
 
-# API endpoint to get the list of available pipelines
+# --- API Endpoints ---
+
 @app.route('/api/pipelines')
 def get_pipelines():
-    pipeline_dir = './pipelines'
-    try:
-        pipelines = [d for d in os.listdir(pipeline_dir) if os.path.isdir(os.path.join(pipeline_dir, d))]
-        return jsonify(pipelines)
-    except FileNotFoundError:
-        return jsonify({'error': 'Pipelines directory not found'}), 404
+    return jsonify(available_pipelines)
 
-# API endpoint to handle file uploads
 @app.route('/api/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-    
-    file = request.files['file']
+def upload_files():
+    if 'files' not in request.files:
+        return jsonify({'error': 'No files part in the request'}), 400
 
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
+    files = request.files.getlist('files')
 
-    if file:
-        job_id = str(uuid.uuid4())
-        # Sanitize filename for security in a real app
-        filename = f"{job_id}_{file.filename}"
-        filepath = os.path.join(UPLOADS_DIR, filename)
+    if not files or all(f.filename == '' for f in files):
+        return jsonify({'error': 'No files selected'}), 400
 
-        file.save(filepath)
+    job_id = str(uuid.uuid4())
+    job_files = []
 
-        jobs_db[job_id] = {
-            'original_filename': file.filename,
-            'filepath': filepath,
-            'status': 'uploaded'
-        }
+    for file in files:
+        if file:
+            # In a real app, you'd want to sanitize filenames properly
+            filename = f"{job_id}_{file.filename}"
+            filepath = os.path.join(UPLOADS_DIR, filename)
+            file.save(filepath)
+            job_files.append({
+                'original_filename': file.filename,
+                'filepath': filepath
+            })
 
-        return jsonify({'jobId': job_id, 'filename': file.filename})
+    jobs_db[job_id] = {
+        'files': job_files,
+        'status': 'uploaded'
+    }
 
-# API endpoint to run a job
+    return jsonify({
+        'jobId': job_id,
+        'filenames': [f['original_filename'] for f in job_files]
+    })
+
 @app.route('/api/run-job', methods=['POST'])
 def run_job():
     data = request.get_json()
     job_id = data.get('jobId')
-    pipeline_name = data.get('pipelineName')
+    pipeline_id = data.get('pipelineId')
 
-    if not job_id or not pipeline_name:
-        return jsonify({'error': 'Missing jobId or pipelineName'}), 400
+    if not job_id or not pipeline_id:
+        return jsonify({'error': 'Missing jobId or pipelineId'}), 400
 
     job_info = jobs_db.get(job_id)
     if not job_info:
         return jsonify({'error': 'Job not found'}), 404
 
-    # This is where you would trigger the actual Docker process
-    # For now, we just simulate the command
-    docker_image_name = f"{pipeline_name}-image"
-    # Note: In a real-world scenario, mounting volumes like this requires careful
-    # security considerations to prevent directory traversal attacks.
-    docker_command = f"docker run --rm -v {os.path.abspath(UPLOADS_DIR)}:/data {docker_image_name}"
+    pipeline = next((p for p in available_pipelines if p['id'] == pipeline_id), None)
+    if not pipeline:
+        return jsonify({'error': 'Pipeline not found'}), 404
+
+    # Get the relative path for the files for the container
+    filenames = [os.path.basename(f['filepath']) for f in job_info['files']]
+
+    # This now calls the actual execution function
+    process = pipeline_manager.run_pipeline(pipeline, job_id, filenames)
+
+    if process is None:
+        return jsonify({'error': 'Failed to start pipeline process'}), 500
 
     jobs_db[job_id]['status'] = 'running'
-    jobs_db[job_id]['pipeline'] = pipeline_name
-
-    print(f"Executing job {job_id} with pipeline {pipeline_name}.")
-    print(f"Simulated command: {docker_command}")
+    jobs_db[job_id]['pipeline'] = pipeline_id
+    jobs_db[job_id]['process_pid'] = process.pid
 
     return jsonify({
-        'message': f"Job '{job_id}' started with pipeline '{pipeline_name}'.",
-        'docker_command_simulation': docker_command
+        'message': f"Job '{job_id}' started with pipeline '{pipeline_id}'.",
     })
 
+# --- Main Application Setup ---
 
 if __name__ == '__main__':
     # Create uploads directory if it doesn't exist
     if not os.path.exists(UPLOADS_DIR):
         os.makedirs(UPLOADS_DIR)
 
-    # Build Docker images for all pipelines on startup.
-    print("Attempting to build Docker images for all pipelines...")
-    try:
-        pipeline_dir = './pipelines'
-        pipelines = [d for d in os.listdir(pipeline_dir) if os.path.isdir(os.path.join(pipeline_dir, d))]
-        for pipeline in pipelines:
-            image_name = f"{pipeline}-image"
-            pipeline_path = os.path.join(pipeline_dir, pipeline)
-            print(f"Building image '{image_name}' from '{pipeline_path}'...")
-            # Using capture_output=True to hide verbose build logs unless there's an error
-            result = subprocess.run(
-                ['docker', 'build', '-t', image_name, pipeline_path],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            print(f"Image '{image_name}' built successfully.")
-
-    except FileNotFoundError:
-        print("Could not build Docker images: 'docker' command not found. Please ensure Docker is installed and in your PATH.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error building Docker image for '{pipeline}'. Please ensure Docker is running.")
-        print(f"Stderr:\n{e.stderr}")
-
-    except Exception as e:
-        print(f"An unexpected error occurred during Docker image build: {e}")
+    # Discover and build pipelines on startup
+    print("--- Initializing Pipelines ---")
+    available_pipelines = pipeline_manager.discover_pipelines()
+    if not available_pipelines:
+        print("Warning: No pipelines found. Please check the 'pipelines' directory.")
+    else:
+        print(f"Found {len(available_pipelines)} pipelines: {[p['name'] for p in available_pipelines]}")
+        # In a real CI/CD environment, pipelines would be pre-built.
+        # To avoid issues with Docker Hub rate limits in this environment,
+        # we are skipping the build step.
+        # try:
+        #     pipeline_manager.build_pipelines(available_pipelines)
+        #     print("--- Pipeline initialization complete ---")
+        # except Exception as e:
+        #     print(f"Fatal error during pipeline initialization: {e}")
+        #     exit(1)
+        print("--- Pipeline building on startup is disabled ---")
 
     app.run(host='0.0.0.0', debug=True, port=5000)

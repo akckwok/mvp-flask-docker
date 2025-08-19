@@ -1,0 +1,20 @@
+{
+  "name": "Video Converter",
+  "description": "A placeholder pipeline that simulates converting video files.",
+  "inputs": [
+    {
+      "name": "video_files",
+      "type": "file",
+      "description": "The video files to be 'converted'.",
+      "multiple": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "converted_video",
+      "type": "file",
+      "description": "The converted video file."
+    }
+  ],
+  "image_name": "video-converter-image"
+}

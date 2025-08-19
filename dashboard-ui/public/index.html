@@ -27,6 +27,22 @@
             <!-- Pages will be dynamically loaded here -->
             <section id="jobs" class="page active">
                 <h2>Job Submission</h2>
+                <div class="pipeline-selection-area">
+                    <h3>1. Select a Pipeline</h3>
+                    <select id="pipeline-selector" class="pipeline-dropdown" disabled>
+                        <option value="">Loading pipelines...</option>
+                    </select>
+                    <div id="pipeline-info" class="pipeline-info-container" style="display: none;">
+                        <h4>Pipeline Details</h4>
+                        <p><strong>Description:</strong> <span id="pipeline-desc"></span></p>
+                        <h5>Inputs:</h5>
+                        <ul id="pipeline-inputs"></ul>
+                        <h5>Outputs:</h5>
+                        <ul id="pipeline-outputs"></ul>
+                    </div>
+                </div>
+
+                <h3>2. Upload Files</h3>
                 <div id="drop-zone-container"></div>
                 <div id="status-cards-container" style="margin-top: 30px;"></div>
             </section>
