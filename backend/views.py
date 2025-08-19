@@ -6,7 +6,7 @@ from . import pipeline_manager
 from .config import UPLOADS_DIR
 from flask_login import login_user, current_user, logout_user, login_required
 from .forms import RegistrationForm, LoginForm
-from .extensions import bcrypt
+from .app import bcrypt
 
 api = Blueprint('api', __name__)
 
