@@ -4,8 +4,9 @@ import json
 import tempfile
 import shutil
 from backend.app import create_app
-from backend.models import db, Job
+from backend.models import db, Job, User
 from backend.pipeline_manager import discover_pipelines
+from backend.extensions import bcrypt
 
 class TestPipelineManager(unittest.TestCase):
     def setUp(self):
@@ -64,9 +65,20 @@ class TestApi(unittest.TestCase):
     def test_get_jobs(self):
         """Test the /api/jobs endpoint."""
         with self.app.app_context():
-            job = Job(id='test-job', files=[{'filename': 'test.txt'}])
+            hashed_password = bcrypt.generate_password_hash('password').decode('utf-8')
+            user = User(username='testuser', email='test@test.com', password_hash=hashed_password)
+            db.session.add(user)
+            db.session.commit()
+
+            job = Job(id='test-job', files=[{'filename': 'test.txt'}], user_id=user.id)
             db.session.add(job)
             db.session.commit()
+
+        # Log in the user
+        self.client.post('/api/login', data=json.dumps({
+            'username': 'testuser',
+            'password': 'password'
+        }), content_type='application/json')
 
         response = self.client.get('/api/jobs')
         self.assertEqual(response.status_code, 200)

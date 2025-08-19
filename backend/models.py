@@ -21,6 +21,9 @@ class Job(db.Model):
     container_id = db.Column(db.String(64), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    data_submission_id = db.Column(db.Integer, db.ForeignKey('data_submission.id'), nullable=True)
+
+    data_submission = db.relationship('DataSubmission', backref=db.backref('jobs', lazy=True))
 
     @property
     def files(self):
@@ -36,7 +39,8 @@ class Job(db.Model):
             'files': self.files,
             'status': self.status,
             'pipeline': self.pipeline,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat(),
+            'data_submission_id': self.data_submission_id
         }
 
 
@@ -110,6 +114,8 @@ class Project(db.Model):
 
 class DataSubmission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
     project_id = db.Column(db.String(100), db.ForeignKey('project.id'), nullable=False)
     sample_ids = db.Column(db.Text, nullable=False)
     extraction_date = db.Column(db.Date, nullable=False)
@@ -120,7 +126,28 @@ class DataSubmission(db.Model):
     primers_used = db.Column(db.String(200), nullable=True)
     submitted_to = db.Column(db.String(120), nullable=False)
     submission_date = db.Column(db.Date, nullable=False)
-    raw_data_file = db.Column(db.String(200), nullable=True)
-    provenance_email = db.Column(db.String(200), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    uploaded_files = db.Column(db.Text, nullable=True)  # JSON array of file info
 
     project = db.relationship('Project', backref=db.backref('data_submissions', lazy=True))
+    user = db.relationship('User', backref=db.backref('data_submissions', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'project_id': self.project_id,
+            'sample_ids': self.sample_ids,
+            'extraction_date': self.extraction_date.isoformat(),
+            'extracted_by': self.extracted_by,
+            'extraction_method': self.extraction_method,
+            'method_modifications': self.method_modifications,
+            'sequencing_method': self.sequencing_method,
+            'primers_used': self.primers_used,
+            'submitted_to': self.submitted_to,
+            'submission_date': self.submission_date.isoformat(),
+            'user_id': self.user_id,
+            'project_name': self.project.project_name if self.project else None,
+            'uploaded_files': json.loads(self.uploaded_files) if self.uploaded_files else []
+        }

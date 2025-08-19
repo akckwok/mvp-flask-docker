@@ -17,7 +17,7 @@ function displayLogs(card, jobId, pipelineName) {
     addLog('(Real-time log streaming is not implemented in this version)');
 }
 
-export function createStatusCard(jobId, filenames, pipeline) {
+export function createStatusCard(jobId, filenames, pipeline, submissionId) {
     const cardId = `card-${jobId}`;
     const card = document.createElement('div');
     card.className = 'status-card';
@@ -57,6 +57,7 @@ export function createStatusCard(jobId, filenames, pipeline) {
                 body: JSON.stringify({
                     jobId: jobId,
                     pipelineId: pipeline.id,
+                    submissionId: submissionId
                 }),
             });
 
