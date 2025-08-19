@@ -1,3 +1,4 @@
+import '../public/styles.css';
 import './App.js';
 import { initializeJobSubmissionPage } from './pages/JobSubmission.js';
 import { initializeAllJobsPage } from './pages/AllJobs.js';
