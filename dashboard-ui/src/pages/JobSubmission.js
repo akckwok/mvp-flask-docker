@@ -2,7 +2,9 @@ import { createDropZone } from '../components/DropZone.js';
 import { createStatusCard } from '../components/StatusCard.js';
 
 let availablePipelines = [];
+let availableSubmissions = [];
 let selectedPipeline = null;
+let selectedSubmission = null;
 
 function updatePipelineInfo() {
     const pipelineInfo = document.getElementById('pipeline-info');
@@ -34,7 +36,6 @@ function updatePipelineInfo() {
     pipelineInfo.style.display = 'block';
 }
 
-
 async function fetchPipelines() {
     try {
         const response = await fetch('/api/pipelines');
@@ -59,13 +60,37 @@ async function fetchPipelines() {
     }
 }
 
+async function fetchSubmissions() {
+    try {
+        const response = await fetch('/api/submissions');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        availableSubmissions = await response.json();
+
+        const selector = document.getElementById('submission-selector');
+        selector.innerHTML = '<option value="">Select a data submission...</option>';
+        availableSubmissions.forEach(s => {
+            const option = document.createElement('option');
+            option.value = s.id;
+            option.textContent = s.name;
+            selector.appendChild(option);
+        });
+        selector.disabled = false;
+
+    } catch (error) {
+        console.error('Failed to fetch submissions:', error);
+        alert('Could not load submissions. Please check the server.');
+    }
+}
+
 async function handleFilesSelect(files) {
-    if (!selectedPipeline) {
-        alert('Please select a pipeline before uploading files.');
+    if (!selectedPipeline || !selectedSubmission) {
+        alert('Please select a pipeline and a data submission before uploading files.');
         return;
     }
 
-    console.log(`Uploading ${files.length} file(s) for pipeline ${selectedPipeline.name}...`);
+    console.log(`Uploading ${files.length} file(s) for submission ${selectedSubmission.name} and pipeline ${selectedPipeline.name}...`);
 
     const formData = new FormData();
     files.forEach(file => {
@@ -73,7 +98,7 @@ async function handleFilesSelect(files) {
     });
 
     try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch(`/api/submissions/${selectedSubmission.id}/create-job`, {
             method: 'POST',
             body: formData,
         });
@@ -81,7 +106,7 @@ async function handleFilesSelect(files) {
         const result = await response.json();
 
         if (response.ok) {
-            createStatusCard(result.jobId, result.filenames, selectedPipeline);
+            createStatusCard(result.jobId, result.filenames, selectedPipeline, selectedSubmission.id);
         } else {
             console.error('Upload failed:', result.error);
             alert(`Upload Error: ${result.error}`);
@@ -95,23 +120,33 @@ async function handleFilesSelect(files) {
 export function initializeJobSubmissionPage() {
     const dropZoneContainer = document.getElementById('drop-zone-container');
     const pipelineSelector = document.getElementById('pipeline-selector');
+    const submissionSelector = document.getElementById('submission-selector');
 
     createDropZone(dropZoneContainer, handleFilesSelect);
     // Initially disable dropzone
     dropZoneContainer.querySelector('.drop-zone').classList.add('disabled');
 
-
     pipelineSelector.addEventListener('change', (e) => {
         const pipelineId = e.target.value;
         selectedPipeline = availablePipelines.find(p => p.id === pipelineId);
         updatePipelineInfo();
+        checkEnableDropZone();
+    });
 
-        if (selectedPipeline) {
+    submissionSelector.addEventListener('change', (e) => {
+        const submissionId = e.target.value;
+        selectedSubmission = availableSubmissions.find(s => s.id == submissionId);
+        checkEnableDropZone();
+    });
+
+    function checkEnableDropZone() {
+        if (selectedPipeline && selectedSubmission) {
             dropZoneContainer.querySelector('.drop-zone').classList.remove('disabled');
         } else {
             dropZoneContainer.querySelector('.drop-zone').classList.add('disabled');
         }
-    });
+    }
 
     fetchPipelines();
+    fetchSubmissions();
 }

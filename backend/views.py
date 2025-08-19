@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 from flask import Blueprint, request, jsonify, current_app
 from .models import Job, User, db, Project, Skill, LabMember, DataSubmission
 from . import pipeline_manager
@@ -67,38 +68,34 @@ def get_profile():
 def get_pipelines():
     return jsonify(current_app.config['AVAILABLE_PIPELINES'])
 
-@api.route('/upload', methods=['POST'])
+@api.route('/submissions/<int:submission_id>/create-job', methods=['POST'])
 @login_required
-def upload_files():
+def create_job_in_submission(submission_id):
     if 'files' not in request.files:
         return jsonify({'error': 'No files part in the request'}), 400
 
     files = request.files.getlist('files')
-
     if not files or all(f.filename == '' for f in files):
         return jsonify({'error': 'No files selected'}), 400
 
+    submission = DataSubmission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
     job_id = str(uuid.uuid4())
     job_files = []
-
     for file in files:
         if file:
             filename = f"{job_id}_{file.filename}"
             filepath = os.path.join(UPLOADS_DIR, filename)
             file.save(filepath)
-            job_files.append({
-                'original_filename': file.filename,
-                'filepath': filepath
-            })
+            job_files.append({'original_filename': file.filename, 'filepath': filepath})
 
-    new_job = Job(id=job_id, files=job_files, user_id=current_user.id)
+    new_job = Job(id=job_id, files=job_files, user_id=current_user.id, data_submission_id=submission_id)
     db.session.add(new_job)
     db.session.commit()
 
-    return jsonify({
-        'jobId': new_job.id,
-        'filenames': [f['original_filename'] for f in new_job.files]
-    })
+    return jsonify({'jobId': new_job.id, 'filenames': [f['original_filename'] for f in new_job.files]})
 
 @api.route('/run-job', methods=['POST'])
 @login_required
@@ -106,13 +103,20 @@ def run_job():
     data = request.get_json()
     job_id = data.get('jobId')
     pipeline_id = data.get('pipelineId')
+    submission_id = data.get('submissionId')
 
-    if not job_id or not pipeline_id:
-        return jsonify({'error': 'Missing jobId or pipelineId'}), 400
+    if not job_id or not pipeline_id or not submission_id:
+        return jsonify({'error': 'Missing jobId, pipelineId, or submissionId'}), 400
 
     job = Job.query.filter_by(id=job_id, user_id=current_user.id).first()
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+
+    submission = DataSubmission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    job.data_submission_id = submission_id
 
     available_pipelines = current_app.config['AVAILABLE_PIPELINES']
     pipeline = next((p for p in available_pipelines if p['id'] == pipeline_id), None)
@@ -225,20 +229,81 @@ def get_members():
     return jsonify([member.to_dict() for member in members])
 
 
+@api.route('/submissions', methods=['GET'])
+@login_required
+def get_submissions():
+    submissions = DataSubmission.query.filter_by(user_id=current_user.id).all()
+    return jsonify([submission.to_dict() for submission in submissions])
+
+@api.route('/submissions/<int:submission_id>/run-pipeline', methods=['POST'])
+@login_required
+def run_pipeline_from_submission(submission_id):
+    data = request.get_json()
+    pipeline_id = data.get('pipeline_id')
+
+    if not pipeline_id:
+        return jsonify({'error': 'Missing pipeline_id'}), 400
+
+    submission = DataSubmission.query.get(submission_id)
+    if not submission:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    if submission.user_id != current_user.id:
+        return jsonify({'error': 'Forbidden'}), 403
+
+    available_pipelines = current_app.config['AVAILABLE_PIPELINES']
+    pipeline = next((p for p in available_pipelines if p['id'] == pipeline_id), None)
+    if not pipeline:
+        return jsonify({'error': 'Pipeline not found'}), 404
+
+    job_id = str(uuid.uuid4())
+    new_job = Job(
+        id=job_id,
+        _files=submission.uploaded_files,
+        user_id=current_user.id,
+        data_submission_id=submission.id,
+        pipeline=pipeline_id,
+        status='pending'
+    )
+    db.session.add(new_job)
+    db.session.commit()
+
+    filenames = [os.path.basename(f['filepath']) for f in new_job.files]
+    process = pipeline_manager.run_pipeline(pipeline, new_job.id, filenames)
+
+    if process is None:
+        new_job.status = 'failed'
+        db.session.commit()
+        return jsonify({'error': 'Failed to start pipeline process'}), 500
+
+    new_job.status = 'running'
+    new_job.container_id = process.id
+    db.session.commit()
+
+    return jsonify({'message': 'Job started successfully', 'job_id': new_job.id})
+
 @api.route('/submit_data', methods=['POST'])
 @login_required
 def submit_data():
-    # This endpoint needs to handle file uploads as well as form data.
-    # The provided HTML uses FormData, so we need to access fields from `request.form`
-    # and files from `request.files`.
-
-    # For simplicity in this step, we'll assume the file paths are just stored as strings.
-    # A full implementation would save the files and store the paths.
-
     extraction_date = datetime.strptime(request.form['extraction-date'], '%Y-%m-%d').date()
     submission_date = datetime.strptime(request.form['submission-date'], '%Y-%m-%d').date()
 
+    uploaded_files_info = []
+    if 'uploaded_files' in request.files:
+        files = request.files.getlist('uploaded_files')
+        for file in files:
+            if file:
+                filename = f"{uuid.uuid4()}_{file.filename}"
+                filepath = os.path.join(UPLOADS_DIR, filename)
+                file.save(filepath)
+                uploaded_files_info.append({
+                    'original_filename': file.filename,
+                    'filepath': filepath
+                })
+
     new_submission = DataSubmission(
+        name=request.form['name'],
+        description=request.form.get('description'),
         project_id=request.form['project-id'],
         sample_ids=request.form['sample-ids'],
         extraction_date=extraction_date,
@@ -249,9 +314,8 @@ def submit_data():
         primers_used=request.form.get('primers-used'),
         submitted_to=request.form['submitted-to'],
         submission_date=submission_date,
-        # Storing filenames for now. In a real app, you'd handle the file upload here.
-        raw_data_file=request.files.get('raw-data-file').filename if 'raw-data-file' in request.files else None,
-        provenance_email=request.files.get('provenance-email').filename if 'provenance-email' in request.files else None
+        user_id=current_user.id,
+        uploaded_files=json.dumps(uploaded_files_info)
     )
     db.session.add(new_submission)
     db.session.commit()

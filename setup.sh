@@ -33,7 +33,7 @@ for pipeline in pipelines/*/; do
             image_name="${pipeline_id}-image"
         fi
         echo "Building image '$image_name' for pipeline '$pipeline_id'..."
-        docker build -t "$image_name" "$pipeline"
+        sudo docker build -t "$image_name" "$pipeline"
     fi
 done
 echo "Pipeline images built."

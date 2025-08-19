@@ -24,6 +24,8 @@ function showPage(pageId) {
 }
 
 import { initializeAllJobsPage } from './pages/AllJobs.js';
+import { initializeSubmissionsPage } from './pages/Submissions.js';
+import { initializeJobSubmissionPage } from './pages/JobSubmission.js';
 
 function handleRouteChange() {
     // Get the page id from the hash, or default to 'job-submission'
@@ -32,6 +34,10 @@ function handleRouteChange() {
 
     if (pageId === 'all-jobs') {
         initializeAllJobsPage();
+    } else if (pageId === 'submissions') {
+        initializeSubmissionsPage();
+    } else if (pageId === 'job-submission') {
+        initializeJobSubmissionPage();
     }
 }
 
