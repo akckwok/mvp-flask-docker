@@ -9,3 +9,12 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+
+# Node.js dependencies
+node_modules/
+
+# Frontend build output
+dist/
+
+# Database file
+database.db
