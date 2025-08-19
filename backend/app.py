@@ -65,7 +65,7 @@ def create_app():
         if not current_user.is_authenticated:
             return send_from_directory(ui_dir, 'login.html')
 
-        if path in ['login', 'register']:
+        if path in ['login', 'register', 'data_submission', 'profile_creation', 'project_submission', 'directory']:
              return send_from_directory(ui_dir, f'{path}.html')
 
         return send_from_directory(ui_dir, 'index.html')
