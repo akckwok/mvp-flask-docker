@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test</title>
+    <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body class="p-8">
+
+    <h1 class="text-2xl font-bold">Theme Test Page</h1>
+
+    <div class="dropdown dropdown-top mt-4">
+        <div tabindex="0" role="button" class="btn">Theme</div>
+        <ul tabindex="0" id="theme-dropdown" class="dropdown-content z-[1] p-2 shadow-2xl bg-base-300 rounded-box w-52">
+            <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="Default" value="light"/></li>
+            <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="Dark" value="dark"/></li>
+        </ul>
+    </div>
+
+    <div class="mt-4">
+        <button class="btn btn-primary">Primary Button</button>
+    </div>
+
+    <script type="module" src="/src/theme.js"></script>
+</body>
+</html>
