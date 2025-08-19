@@ -4,19 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Pipeline Dashboard</title>
-    <link rel="stylesheet" href="/public/styles.css">
+    <link href="/src/styles.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h1>Your Profile</h1>
-        <div id="profile-info">
-            <p><strong>Username:</strong> <span id="username"></span></p>
-            <p><strong>Full Name:</strong> <span id="full_name"></span></p>
-            <p><strong>Email:</strong> <span id="email"></span></p>
-            <p><strong>Phone Number:</strong> <span id="phone_number"></span></p>
+<body class="bg-base-200 min-h-screen flex items-center justify-center">
+    <div class="card w-96 bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Your Profile</h2>
+            <div id="profile-info" class="space-y-2">
+                <p><strong>Username:</strong> <span id="username"></span></p>
+                <p><strong>Full Name:</strong> <span id="full_name"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Phone Number:</strong> <span id="phone_number"></span></p>
+            </div>
+            <div class="card-actions justify-end">
+                <a href="/" class="btn btn-primary">Back to Dashboard</a>
+            </div>
         </div>
-        <a href="/">Back to Dashboard</a>
     </div>
-    <script src="/src/pages/profile.js"></script>
+    <script type="module" src="/src/pages/profile.js"></script>
 </body>
 </html>

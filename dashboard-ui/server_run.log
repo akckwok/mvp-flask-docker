@@ -1,0 +1,30 @@
+
+> dev
+> vite
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v5.4.19  ready in 332 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+(node:6503) Warning: Failed to load the ES module: /app/dashboard-ui/postcss.config.js. Make sure to set "type": "module" in the nearest package.json file or use the .mjs extension.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Failed to load PostCSS config: Failed to load PostCSS config (searchPath: /app/dashboard-ui/dashboard-ui): [SyntaxError] Unexpected token 'export'
+/app/dashboard-ui/postcss.config.js:1
+export default {
+^^^^^^
+
+SyntaxError: Unexpected token 'export'
+    at wrapSafe (node:internal/modules/cjs/loader:1662:18)
+    at Module._compile (node:internal/modules/cjs/loader:1704:20)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at cjsLoader (node:internal/modules/esm/translators:266:5)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:200:7)
+    at ModuleJob.run (node:internal/modules/esm/module_job:329:25)]
+
+Node.js v22.17.1
