@@ -98,6 +98,12 @@ def run_job():
         'message': f"Job '{job_id}' started with pipeline '{pipeline_id}'.",
     })
 
+@app.route('/api/jobs')
+def get_jobs():
+    # Return a list of jobs, sorted by a 'created_at' timestamp if available
+    # For now, we'll just return the dictionary as a list of its values
+    return jsonify(list(jobs_db.values()))
+
 # --- Main Application Setup ---
 
 if __name__ == '__main__':
