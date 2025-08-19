@@ -2,92 +2,106 @@
 
 ## 1. Project Overview
 
-This project is a web-based dashboard for submitting files to various processing pipelines that run inside Docker containers. It features a modern single-page application (SPA) interface that allows users to upload a file, select an available processing pipeline, and monitor the job's progress in real-time.
+This project is a web-based dashboard for submitting files to various processing pipelines that run inside Docker containers. It features a modern single-page application (SPA) interface built with Vite and vanilla JavaScript, allowing users to upload files, select a processing pipeline, and monitor job progress.
 
-The backend is a lightweight Flask server responsible for handling file uploads, managing jobs, and orchestrating Docker container execution. The frontend is built with vanilla JavaScript, emphasizing a modular, component-based structure without the need for a heavy framework.
+The backend is a refactored Flask application that handles file uploads, manages jobs in a persistent SQLite database, and orchestrates Docker container execution using the `docker-py` library.
 
 ---
 
 ## 2. Core Features
 
-*   **Single-Page Application (SPA):** A fluid dashboard interface with client-side routing for a seamless user experience without page reloads.
-*   **Drag-and-Drop File Uploads:** An intuitive interface for selecting and uploading files.
-*   **Dynamic Status Cards:** Real-time feedback for each job, showing the current status (e.g., Awaiting Selection, Processing, Complete).
-*   **Simulated Log Output:** A log viewer on each status card provides mock output from the backend process, simulating a real data pipeline.
+*   **Modern SPA Frontend:** A fluid dashboard interface powered by Vite for a fast development experience and an optimized production build.
+*   **Persistent Job-Queue:** Jobs are stored in an SQLite database, so they are not lost on server restart.
 *   **Dynamic Pipeline Discovery:** The backend automatically discovers and lists available pipelines from the project's `/pipelines` directory.
-*   **Containerized Processing:** Each pipeline is defined by a simple `Dockerfile`, ensuring a consistent and isolated execution environment.
+*   **Containerized Processing:** Each pipeline runs in a Docker container, ensuring a consistent and isolated execution environment.
 
 ---
 
 ## 3. How to Run the Project
 
-Follow these steps to get the application running on your local machine.
-
 ### Prerequisites
 
-*   **Python 3:** Ensure you have Python 3 installed. You can check with `python3 --version`.
-*   **Docker:** The application requires Docker to build and run the processing pipelines. Make sure the Docker daemon is running. You can check by running `docker ps`.
+*   **Python 3:** Ensure you have Python 3 installed.
+*   **Node.js and npm:** Required for the frontend.
+*   **Docker:** The application requires Docker to run the processing pipelines.
+
+### Docker without `sudo` (Recommended)
+
+To run Docker commands without `sudo`, you should add your user to the `docker` group:
+```bash
+sudo usermod -aG docker ${USER}
+```
+You will need to log out and log back in for this change to take effect.
 
 ### Installation & Setup
 
-1.  **Clone the repository (if you haven't already):**
-    ```bash
-    git clone <repository-url>
-    cd <repository-directory>
-    ```
-
+1.  **Clone the repository.**
 2.  **Install Python dependencies:**
-    This project uses Flask as its web server. Install it using the `requirements.txt` file.
     ```bash
     pip install -r requirements.txt
     ```
-
-### Running the Application
-
-1.  **Start the server:**
-    Run the `server.py` script from the root of the project.
+3.  **Install frontend dependencies:**
     ```bash
-    python3 server.py
+    npm install --prefix dashboard-ui
     ```
-    When the server starts, it will automatically build the Docker images for all pipelines found in the `/pipelines` directory. You should see output indicating that the images are being built.
 
-2.  **Access the dashboard:**
-    Open your web browser and navigate to:
-    [http://localhost:5000](http://localhost:5000)
+### Building the Pipeline Images
+
+The application expects that the Docker images for the pipelines have been pre-built. You need to build an image for each pipeline defined in the `/pipelines` directory.
+
+For example, to build the `word-counter` pipeline:
+```bash
+docker build -t word-counter-image ./pipelines/word-counter
+```
+Make sure the image name matches the `image_name` field in the pipeline's `manifest.json`, or the convention `<pipeline_id>-image` if `image_name` is not specified.
 
 ---
 
-## 4. Project Structure
+## 4. Running the Application
 
-The project is organized into a few key directories:
+There are two ways to run the application:
+
+### Production Mode
+
+In this mode, the Flask server serves the optimized frontend build.
+
+1.  **Build the frontend:**
+    ```bash
+    npm run build --prefix dashboard-ui
+    ```
+2.  **Run the Flask server:**
+    ```bash
+    python run.py
+    ```
+
+### Development Mode
+
+For development, you should run the Flask backend and the Vite dev server separately. This provides hot-reloading for the frontend.
+
+1.  **Run the Flask backend:**
+    ```bash
+    python run.py
+    ```
+2.  **In a separate terminal, run the Vite dev server:**
+    ```bash
+    npm run dev --prefix dashboard-ui
+    ```
+    The Vite server will proxy API requests to the Flask backend (by default on port 5000). You will need to add a `vite.config.js` to configure the proxy.
+
+---
+
+## 5. Project Structure
+
+The project is organized into a clean, separated backend and frontend structure.
 
 ```
 /
-├── dashboard-ui/         # Contains all frontend assets (HTML, CSS, JS)
-│   ├── public/           # Main index.html and styles
-│   └── src/              # JavaScript source code (components, pages)
+├── backend/              # All Python/Flask backend code
+├── dashboard-ui/         # All frontend assets (JS, CSS, etc.)
+│   ├── src/              # Frontend source code
+│   └── package.json      # Frontend dependencies
 ├── pipelines/            # Houses all available processing pipelines
-│   ├── word-counter/     # An example pipeline
-│   └── video-converter/  # Another example pipeline
 ├── uploads/              # Temporary storage for user-uploaded files
-├── server.py             # The main Flask web server
+├── run.py                # Script to run the Flask server
 └── README.md             # This file
-```
-
----
-
-## 5. Adding a New Pipeline
-
-The application is designed to make adding new pipelines simple.
-
-1.  **Create a new directory** inside the `/pipelines` folder. The name of this directory will be used as the pipeline's unique identifier (e.g., `/pipelines/my-new-pipeline`).
-
-2.  **Add a `Dockerfile`** to your new directory. This file defines the environment for your pipeline.
-
-3.  **Add a processing script** (e.g., `process.sh`, `process.py`). This script will be executed by the `CMD` instruction in your `Dockerfile`.
-
-4.  **That's it!** The next time you start the server with `python3 server.py`, it will automatically:
-    *   Discover your new pipeline.
-    *   Build a Docker image for it (e.g., `my-new-pipeline-image`).
-    *   List it as an option in the dropdown menu on the dashboard.
 ```
