@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/public/styles.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
         @keyframes fadeInOut {
@@ -20,104 +21,128 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <div class="container mx-auto px-4 py-8 md:py-12 max-w-2xl">
-
-        <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Lab Member Roles & Responsibilities</h1>
-            <p class="mt-2 text-md text-gray-600">Please fill out this form to help us create a clear directory of our team.</p>
-            <div class="mt-4">
-                 <a href="/directory" class="text-indigo-600 hover:text-indigo-800 font-medium">View Full Lab Directory &rarr;</a>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1>Dashboard</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html#job-submission" class="nav-link">Job Submission</a></li>
+                    <li><a href="index.html#all-jobs" class="nav-link">All Jobs</a></li>
+                    <li><a href="index.html#reports" class="nav-link">Reports</a></li>
+                    <li><a href="directory.html" class="nav-link">Directory</a></li>
+                    <li><a href="data_submission.html" class="nav-link">Data Submission</a></li>
+                    <li><a href="project_submission.html" class="nav-link">New Project</a></li>
+                    <li><a href="profile_creation.html" class="nav-link">New Member</a></li>
+                    <li><a href="profile.html" class="nav-link">Account</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <p>Logged in as: <span id="username-display"></span></p>
+                <button id="logout-button">Logout</button>
             </div>
-        </div>
+        </aside>
 
-        <form id="lab-form" class="bg-white p-6 md:p-8 rounded-xl shadow-md space-y-6">
+        <main class="content" id="content-area">
+            <div class="container mx-auto px-4 py-8 md:py-12 max-w-2xl">
 
-            <!-- Name, Role, Status... -->
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Dr. Jane Doe">
-            </div>
-
-            <!-- Contact Information Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="jane.doe@university.edu">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Lab Member Roles & Responsibilities</h1>
+                    <p class="mt-2 text-md text-gray-600">Please fill out this form to help us create a clear directory of our team.</p>
+                    <div class="mt-4">
+                         <a href="/directory" class="text-indigo-600 hover:text-indigo-800 font-medium">View Full Lab Directory &rarr;</a>
+                    </div>
                 </div>
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
-                    <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="(123) 456-7890">
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Primary Role</label>
-                    <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="" disabled selected>Select your role</option>
-                        <option value="Principal Investigator">Principal Investigator</option>
-                        <option value="Lab Manager">Lab Manager</option>
-                        <option value="Research Technician">Research Technician</option>
-                        <option value="Postdoctoral Fellow">Postdoctoral Fellow</option>
-                        <option value="PhD Student">PhD Student</option>
-                        <option value="Master's Student">Master's Student</option>
-                        <option value="Undergraduate Student">Undergraduate Student</option>
-                        <option value="Visiting Scientist">Visiting Scientist</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                     <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="Current">Current</option>
-                        <option value="Alumni">Alumni</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                    <input type="date" id="start-date" name="start-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date (if applicable)</label>
-                    <input type="date" id="end-date" name="end-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-            </div>
-            <div>
-                <label for="projects" class="block text-sm font-medium text-gray-700 mb-1">Current Projects</label>
-                <textarea id="projects" name="projects" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Briefly describe the main projects you are working on."></textarea>
-            </div>
-            <div>
-                <label for="responsibilities" class="block text-sm font-medium text-gray-700 mb-1">Key Responsibilities & Expertise</label>
-                <textarea id="responsibilities" name="responsibilities" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Manages the confocal microscope, expert in Python scripting for data analysis, responsible for chemical inventory..."></textarea>
-            </div>
+                <form id="lab-form" class="bg-white p-6 md:p-8 rounded-xl shadow-md space-y-6">
 
-            <!-- Skills Section -->
-            <div>
-                <label for="skills" class="block text-sm font-medium text-gray-700 mb-1">Skills</label>
-                <p class="text-xs text-gray-500 mb-2">Select all that apply. Use Ctrl/Cmd + Click to select multiple.</p>
-                <select multiple id="skills" name="skills" class="w-full h-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option disabled>Loading skills...</option>
-                </select>
-            </div>
+                    <!-- Name, Role, Status... -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Dr. Jane Doe">
+                    </div>
 
-            <!-- Other Skill Input (Initially Hidden) -->
-            <div id="other-skill-container" class="hidden transition-all duration-300">
-                <label for="other-skill" class="block text-sm font-medium text-gray-700 mb-1">Add a New Skill</label>
-                <input type="text" id="other-skill" name="other-skill" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter new skill and it will be auto-selected">
-            </div>
+                    <!-- Contact Information Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="jane.doe@university.edu">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
+                            <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="(123) 456-7890">
+                        </div>
+                    </div>
 
-            <!-- Submission -->
-            <div class="flex items-center justify-between pt-2">
-                 <a href="/new_project" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Register a New Project &rarr;</a>
-                 <button type="submit" id="submit-button" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Submit
-                </button>
-            </div>
-        </form>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Primary Role</label>
+                            <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="" disabled selected>Select your role</option>
+                                <option value="Principal Investigator">Principal Investigator</option>
+                                <option value="Lab Manager">Lab Manager</option>
+                                <option value="Research Technician">Research Technician</option>
+                                <option value="Postdoctoral Fellow">Postdoctoral Fellow</option>
+                                <option value="PhD Student">PhD Student</option>
+                                <option value="Master's Student">Master's Student</option>
+                                <option value="Undergraduate Student">Undergraduate Student</option>
+                                <option value="Visiting Scientist">Visiting Scientist</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                             <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="Current">Current</option>
+                                <option value="Alumni">Alumni</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input type="date" id="start-date" name="start-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date (if applicable)</label>
+                            <input type="date" id="end-date" name="end-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="projects" class="block text-sm font-medium text-gray-700 mb-1">Current Projects</label>
+                        <textarea id="projects" name="projects" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Briefly describe the main projects you are working on."></textarea>
+                    </div>
+                    <div>
+                        <label for="responsibilities" class="block text-sm font-medium text-gray-700 mb-1">Key Responsibilities & Expertise</label>
+                        <textarea id="responsibilities" name="responsibilities" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Manages the confocal microscope, expert in Python scripting for data analysis, responsible for chemical inventory..."></textarea>
+                    </div>
 
-        <div id="message-area" class="mt-6 text-center"></div>
+                    <!-- Skills Section -->
+                    <div>
+                        <label for="skills" class="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                        <p class="text-xs text-gray-500 mb-2">Select all that apply. Use Ctrl/Cmd + Click to select multiple.</p>
+                        <select multiple id="skills" name="skills" class="w-full h-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option disabled>Loading skills...</option>
+                        </select>
+                    </div>
+
+                    <!-- Other Skill Input (Initially Hidden) -->
+                    <div id="other-skill-container" class="hidden transition-all duration-300">
+                        <label for="other-skill" class="block text-sm font-medium text-gray-700 mb-1">Add a New Skill</label>
+                        <input type="text" id="other-skill" name="other-skill" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter new skill and it will be auto-selected">
+                    </div>
+
+                    <!-- Submission -->
+                    <div class="flex items-center justify-between pt-2">
+                         <a href="/new_project" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Register a New Project &rarr;</a>
+                         <button type="submit" id="submit-button" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Submit
+                        </button>
+                    </div>
+                </form>
+
+                <div id="message-area" class="mt-6 text-center"></div>
+            </div>
+        </main>
     </div>
 
     <script>
