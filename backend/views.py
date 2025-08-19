@@ -15,7 +15,13 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, password_hash=hashed_password)
+        user = User(
+            username=form.username.data,
+            full_name=form.full_name.data,
+            email=form.email.data,
+            phone_number=form.phone_number.data,
+            password_hash=hashed_password
+        )
         db.session.add(user)
         db.session.commit()
         login_user(user)
@@ -44,6 +50,16 @@ def logout():
 @login_required
 def get_user():
     return jsonify({'username': current_user.username})
+
+@api.route('/profile')
+@login_required
+def get_profile():
+    return jsonify({
+        'username': current_user.username,
+        'full_name': current_user.full_name,
+        'email': current_user.email,
+        'phone_number': current_user.phone_number
+    })
 
 @api.route('/pipelines')
 @login_required

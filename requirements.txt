@@ -4,3 +4,4 @@ Flask-Login>=0.6.0
 Flask-Bcrypt
 Flask-WTF>=1.1.0
 docker>=6.0.0
+email_validator
