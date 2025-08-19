@@ -17,29 +17,7 @@ The backend is a refactored Flask application that handles file uploads, manages
 
 ---
 
-## 3. Technology Stack
-
-**Backend:**
-*   **Language:** Python
-*   **Web Framework:** Flask
-*   **Database:** SQLite
-*   **Core Libraries:**
-    *   `Flask-SQLAlchemy`: For database interaction.
-    *   `Flask-Login`: For user authentication.
-    *   `docker`: For orchestrating processing pipelines.
-
-**Frontend:**
-*   **Language:** JavaScript (Vanilla JS)
-*   **Build Tool:** Vite
-*   **Package Manager:** npm
-*   **Styling:** Plain CSS
-
-**Processing Environment:**
-*   **Containerization:** Docker
-
----
-
-## 4. How to Run the Project
+## 3. How to Run the Project
 
 ### Prerequisites
 

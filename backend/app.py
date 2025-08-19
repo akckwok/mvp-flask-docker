@@ -5,8 +5,12 @@ from .config import UPLOADS_DIR, BASE_DIR
 from .views import api
 
 from . import db
+from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
 from .models import User
-from .extensions import bcrypt, login_manager
+
+bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -20,7 +24,6 @@ def create_app():
     # Load config from .config file
     app.config.from_pyfile('config.py')
     app.config['SECRET_KEY'] = 'a_super_secret_key' # CHANGE THIS!
-    app.config['WTF_CSRF_ENABLED'] = False
 
     # --- Initialize Extensions ---
     db.init_app(app)
@@ -58,7 +61,6 @@ def create_app():
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve_spa(path):
-        from flask_login import current_user
         if path and os.path.exists(os.path.join(ui_dir, path)):
             return send_from_directory(ui_dir, path)
 
