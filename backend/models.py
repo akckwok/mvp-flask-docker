@@ -149,5 +149,5 @@ class DataSubmission(db.Model):
             'submission_date': self.submission_date.isoformat(),
             'user_id': self.user_id,
             'project_name': self.project.project_name if self.project else None,
-            'uploaded_files': json.loads(self.uploaded_files) if self.uploaded_files else []
+            'uploaded_files': json.loads(self.uploaded_files) if self.uploaded_files and self.uploaded_files.strip() else []
         }
