@@ -23,10 +23,16 @@ function showPage(pageId) {
     });
 }
 
+import { initializeAllJobsPage } from './pages/AllJobs.js';
+
 function handleRouteChange() {
-    // Get the page id from the hash, or default to 'jobs'
-    const pageId = window.location.hash.substring(1) || 'jobs';
+    // Get the page id from the hash, or default to 'job-submission'
+    const pageId = window.location.hash.substring(1) || 'job-submission';
     showPage(pageId);
+
+    if (pageId === 'all-jobs') {
+        initializeAllJobsPage();
+    }
 }
 
 export function initializeRouter() {
