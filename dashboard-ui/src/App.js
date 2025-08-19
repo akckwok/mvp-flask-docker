@@ -35,48 +35,10 @@ function handleRouteChange() {
     }
 }
 
-async function checkAuth() {
-    try {
-        const response = await fetch('/api/user');
-        if (!response.ok) {
-            window.location.href = '/login.html';
-            return null;
-        }
-        const user = await response.json();
-        return user;
-    } catch (error) {
-        console.error('Authentication check failed', error);
-        window.location.href = '/login.html';
-        return null;
-    }
+export function initializeRouter() {
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleRouteChange);
+
+    // Handle the initial page load
+    handleRouteChange();
 }
-
-function setupLogout() {
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', async () => {
-            await fetch('/api/logout');
-            window.location.href = '/login.html';
-        });
-    }
-}
-
-async function initializeApp() {
-    const user = await checkAuth();
-    if (user) {
-        const usernameDisplay = document.getElementById('username-display');
-        if (usernameDisplay) {
-            usernameDisplay.textContent = user.username;
-        }
-
-        // Listen for hash changes
-        window.addEventListener('hashchange', handleRouteChange);
-
-        // Handle the initial page load
-        handleRouteChange();
-
-        setupLogout();
-    }
-}
-
-initializeApp();
