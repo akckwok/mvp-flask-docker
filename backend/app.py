@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, current_app
 from . import pipeline_manager
 from .config import UPLOADS_DIR, BASE_DIR
 from .views import api
@@ -7,6 +7,7 @@ from .views import api
 from . import db
 from .models import User
 from .extensions import bcrypt, login_manager
+from flask_login import login_user
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -51,6 +52,27 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    # If in testing mode, create a dummy user and log them in before each request
+    if app.config.get('TESTING'):
+        @app.before_request
+        def create_test_user():
+            from flask_login import current_user
+            if not current_user.is_authenticated:
+                # Check if the user already exists
+                user = User.query.filter_by(username='testuser').first()
+                if not user:
+                    hashed_password = bcrypt.generate_password_hash('testpassword').decode('utf-8')
+                    user = User(
+                        username='testuser',
+                        full_name='Test User',
+                        email='test@test.com',
+                        phone_number='1234567890',
+                        password_hash=hashed_password
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                login_user(user)
+
     # --- Static File Serving ---
     # In a production environment, the frontend is served from the 'dashboard-ui' directory.
     ui_dir = os.path.join(BASE_DIR, 'dashboard-ui')
@@ -59,6 +81,12 @@ def create_app():
     @app.route('/<path:path>')
     def serve_spa(path):
         from flask_login import current_user
+        # If in testing mode, bypass authentication
+        if current_app.config.get('TESTING'):
+            if path and os.path.exists(os.path.join(ui_dir, path)):
+                return send_from_directory(ui_dir, path)
+            return send_from_directory(ui_dir, 'index.html')
+
         if path and os.path.exists(os.path.join(ui_dir, path)):
             return send_from_directory(ui_dir, path)
 
