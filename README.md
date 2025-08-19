@@ -118,7 +118,32 @@ For development, you should run the Flask backend and the Vite dev server separa
 
 ---
 
-## 5. Project Structure
+## 5. Testing
+
+For expedited development and testing, especially with tools like Playwright, you can run the server in a special testing mode.
+
+### Running in Testing Mode
+
+To enable testing mode, run the server with the `-t` or `--testing` flag:
+
+```bash
+python run.py -t
+```
+or
+```bash
+python run.py --testing
+```
+
+### Features of Testing Mode
+
+When the application is run in testing mode:
+
+*   **Login Bypass:** The login and registration pages are bypassed. A default user with the username `testuser` is automatically created and logged in.
+*   **Dummy Files for Pipelines:** When a job is run, the pipeline manager will use dummy files instead of requiring actual file uploads. This is useful for testing the frontend flow without needing to provide real data.
+
+---
+
+## 6. Project Structure
 
 The project is organized into a clean, separated backend and frontend structure.
 
