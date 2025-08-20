@@ -33,7 +33,7 @@ export function createDropZone(container, onFilesSelect) {
         dropZone.classList.remove('bg-base-300', 'border-primary');
     };
 
-    const handleDrop = (e) => {.
+    const handleDrop = (e) => {
         e.preventDefault();
         if (dropZone.classList.contains('disabled')) return;
         dropZone.classList.remove('bg-base-300', 'border-primary');
