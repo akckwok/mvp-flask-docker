@@ -74,8 +74,8 @@ def create_app():
                 login_user(user)
 
     # --- Static File Serving ---
-    # In a production environment, the frontend is served from the 'dashboard-ui' directory.
-    ui_dir = os.path.join(BASE_DIR, 'dashboard-ui')
+    # In a production environment, the frontend is served from the 'dashboard-ui/dist' directory.
+    ui_dir = os.path.join(BASE_DIR, 'dashboard-ui', 'dist')
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
@@ -83,6 +83,8 @@ def create_app():
         from flask_login import current_user
         # If in testing mode, bypass authentication
         if current_app.config.get('TESTING'):
+            if path == 'theme_test.html':
+                return send_from_directory(os.path.join(BASE_DIR, 'dashboard-ui'), 'theme_test.html')
             if path and os.path.exists(os.path.join(ui_dir, path)):
                 return send_from_directory(ui_dir, path)
             return send_from_directory(ui_dir, 'index.html')
